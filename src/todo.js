@@ -54,6 +54,7 @@ class Project {
   }
 
   addTask(taskId, taskDetails, form) {
+    if (form.checkValidity() == false) { return; }
     this.tasks[taskId] = taskDetails;
     this.addTaskToDom(this.tasks[taskId], form);
     //addTask.resetFields();
