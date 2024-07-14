@@ -1,0 +1,542 @@
+/* Reset default browser styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Inter";
+}
+
+/* Make html and body take up the full height */
+html,
+body {
+    height: 100%;
+    width: 100%;
+}
+
+/* Use flexbox on the body to center content */
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+button,
+input[type="submit"],
+input[type="reset"] {
+    background: none;
+    color: inherit;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+}
+
+
+.main-header {
+    display: flex;
+    align-items: center;
+    background: #00145B;
+    height: 10%;
+    width: 100%;
+
+    padding: 20px 37px;
+    font-size: 2.25rem;
+}
+
+header>.title {
+    color: #FFFFFF;
+    font-weight: 700;
+}
+
+nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 17.5%;
+    height: 100%;
+    min-width: 336px;
+    border-right: 2px solid #EBEBEB;
+}
+
+.main-container {
+    height: 100%;
+    display: flex;
+}
+
+.task-buttons-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 37%;
+    width: 100%;
+    gap: 34px;
+    padding: 0 43px;
+}
+
+.task-button {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: start;
+    align-items: center;
+    background: #F4F4F4;
+    border-radius: 19px;
+    padding: 11.5px 22.5px;
+    width: 100%;
+    gap: 13.5px;
+}
+
+.task-button-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #585858;
+}
+
+.inbox {
+    width: 40px;
+    height: 40px;
+    background: url('./inbox.png');
+}
+
+.today {
+    width: 40px;
+    height: 40px;
+    background: url('./calendar-today.png');
+}
+
+.this-week {
+    width: 40px;
+    height: 40px;
+    background: url('./calendar-today.png');
+}
+
+.project-container {
+    display: flex;
+    flex-direction: column;
+    height: 63%;
+    justify-content: start;
+    gap: 31px;
+}
+
+.project-container-header {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 0 26px;
+}
+
+.project-container-header>.title {
+    display: flex;
+    font-weight: 700;
+    color: #00145B;
+    font-size: 1.75rem;
+}
+
+.project-container-header>.divider {
+    background: #000000;
+    padding: 2px;
+}
+
+.projects {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.add-project {
+    width: 40px;
+    height: 40px;
+    background: url('./plus-box.png');
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    padding: 0 43px;
+}
+
+.project-tabs-container {
+    display: flex;
+    flex-direction: column;
+    padding: 0 41px;
+    gap: 12px;
+}
+
+#project_tab {
+    display: flex;
+    align-items: center;
+    background: #00145B;
+    padding: 10px 19.5px;
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.project-task-container {
+    display: flex;
+    flex-direction: column;
+    padding: 67px 340px;
+    width: 100%;
+}
+
+.add-task-button-container {
+    justify-content: start;
+}
+
+.add-task {
+    display: flex;
+    width: auto;
+    background: #00145B;
+    color: #FFFFFF;
+    padding: 10px 16.5px;
+    gap: 18px;
+    justify-content: start;
+    margin-top: 21px;
+    margin-bottom: 10px;
+}
+
+.add-task-text {
+    color: #FFFFFF;
+}
+
+.project-task-header-container {
+    display: flex;
+    flex-direction: column;
+
+}
+
+.project-task-header-container>.title {
+    font-size: 3rem;
+    color: #00145B;
+    font-weight: 600;
+}
+
+.project-task-header-container>.divider {
+    padding: 2px;
+    background: #000000;
+}
+
+.project-task-header-container>.description {
+    font-size: 0.8125rem;
+    color: #808080;
+    font-weight: 600;
+    padding: 8px 0 0 0;
+}
+
+.add-task-button-container>.divider {
+    padding: 1px;
+    background: #B7B7B7;
+}
+
+.project-tasks-area {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.task {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #F8F8F8;
+    border: #D2D2D2 solid 1px;
+    padding: 23px 17px;
+    border-radius: 23px;
+}
+
+.task>.left-side {
+    display: flex;
+    align-items: center;
+    gap: 57px;
+}
+
+.task>.right-side {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.task>.right-side>.option-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.task>.right-side>.option-container>button {
+    display: flex;
+    align-items: center;
+    height: 27.8px;
+    width: 27.8px;
+}
+
+.task>.right-side>.option-container>button>img {
+    display: flex;
+    height: 27.8px;
+    width: 27.8px;
+}
+
+.task>.left-side>.checkMark {
+    display: flex;
+    border-radius: 100px;
+    width: 31px;
+    height: 31px;
+    justify-content: center;
+    align-items: center;
+}
+
+.task>.left-side>.checkMark>img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 22px;
+    height: 22px;
+}
+
+.easy {
+    border: #14FF00 solid 3px;
+}
+
+.medium {
+    border: #FF6B00 solid 3px;
+}
+
+.hard {
+    border: #FF0000 solid 3px;
+}
+
+.easy-complete {
+    background: #6DFF60;
+}
+
+.medium-complete {
+    background: #FF862E;
+}
+
+.hard-complete {
+    background: #FE3030;
+}
+
+.task>.left-side>.name {
+    display: flex;
+    color: #232323;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.task>.right-side>.due-date {
+    display: flex;
+    color: #232323;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+#add_project_modal,
+#add_task_modal,
+#info_task_modal,
+#edit_task_modal {
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0);
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Black w/ opacity */
+}
+
+#add_project_modal>.modal-container {
+    display: flex;
+    width: 521.66px;
+    flex-direction: column;
+    background: #FFFFFF;
+    border-radius: 10px;
+    top: 50%;
+    left: 50%;
+    position: fixed;
+    transform: translate(-50%, -50%);
+}
+
+.invalid {
+    border: #FF8E8E solid 2px;
+}
+
+.add-project-nav,
+.add-task-nav,
+.info-task-nav,
+.edit-task-nav {
+    display: flex;
+    justify-content: space-between;
+    background: #00145B;
+    padding: 12px 18px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.heading-container {
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 17.25px;
+}
+
+.heading-container>img {
+    width: 61.21px;
+    height: 61.21px;
+}
+
+.heading-container>header {
+    color: #FFFFFF;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+#add_project_close_button,
+#add_task_close_button,
+#info_task_close_button,
+#edit_task_close_button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#add_project_close_button>img,
+#add_task_close_button>img,
+#info_task_close_button>img,
+#edit_task_close_button>img {
+    width: 42.17px;
+    height: 42.17px;
+}
+
+fieldset {
+    display: flex;
+    flex-direction: column;
+    border: none;
+    gap: 5px;
+}
+
+.modal-container>form {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 36px 54px;
+    gap: 18px;
+}
+
+.modal-container>form>fieldset>.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.modal-container>form>fieldset>.field>label,
+.modal-container>form>fieldset>.bottom-row>.field>label {
+    display: flex;
+    color: #5B5B5B;
+    font-weight: 600;
+    font-size: 1rem;
+    gap: 10px;
+}
+
+.modal-container>form>fieldset>.field>label>span,
+.modal-container>form>fieldset>.bottom-row>.field>label>span {
+    display: flex;
+    color: #FF0000;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.modal-container>form>fieldset>.field>input,
+.modal-container>form>fieldset>.field>textarea {
+    display: flex;
+    border: #DCDCDC solid 2px;
+    padding: 15px 19px;
+    background: #F8F8F8;
+    font-weight: 600;
+    color: #5B5B5B;
+    font-size: 1rem;
+    resize: none;
+    border-radius: 10px;
+}
+
+#add_project_button_save,
+#add_task_button_save,
+#edit_task_button_save {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 113px;
+    background: #00145B;
+    border-radius: 13px;
+}
+
+#add_project_button_save>img,
+#add_task_button_save>img,
+#edit_task_button_save>img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45.96px;
+    height: 45.96px;
+}
+
+.modal-container>form>fieldset>.button-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#add_task_modal>.modal-container,
+#info_task_modal>.modal-container,
+#edit_task_modal>.modal-container {
+    display: flex;
+    width: 521.66px;
+    flex-direction: column;
+    background: #FFFFFF;
+    border-radius: 10px;
+    top: 50%;
+    left: 50%;
+    position: fixed;
+    transform: translate(-50%, -50%);
+}
+
+#add_task_modal>.modal-container>fieldset>.bottom-row,
+#info_task_modal>.modal-container>form>fieldset>.bottom-row,
+#edit_task_modal>.modal-container>form>fieldset>.bottom-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.half {
+    padding: 11px 17px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    border: #DCDCDC solid 2px;
+    width: 100%;
+    color: #5B5B5B;
+}
+
+.bottom-row {
+    display: flex;
+    gap: 6px;
+}
+
+.bottom-row>.field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+#add_task_button_save,
+#edit_task_button_save {
+    margin-top: 50px;
+}
