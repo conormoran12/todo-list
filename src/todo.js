@@ -14,54 +14,27 @@ Date.prototype.getWeek = function () {
 const ProjectManager = {
   currentProject: undefined,
   isInbox: true,
+  currentlyEditingTask: { key: undefined, value: undefined }
 }
 
 class Project {
   constructor(projectName, projectDescription) {
     this.name = projectName;
     this.description = projectDescription;
-    this.tasks = this.createTasksProxy({})
-
-  }
-
-
-
-  createTasksProxy(target) {
-    return new Proxy(target, {
-      set: (obj, prop, value) => {
-        if (!obj.hasOwnProperty(prop)) {
-          console.log(`New task added: ${prop}`);
-          if (this.name == ProjectManager.currentProject.name) {
-          }
-        }
-        obj[prop] = value;
-        if (!obj.hasOwnProperty(prop)) {
-          if (this.name == ProjectManager.currentProject.name) {
-            this.addTaskToDom(obj[prop]);
-          }
-
-        }
-        return true;
-      },
-      deleteProperty: (obj, prop) => {
-        if (obj.hasOwnProperty(prop)) {
-          console.log(`Task removed: ${prop}`);
-        }
-        delete obj[prop];
-        return true;
-      }
-    });
+    this.tasks = {};
   }
 
   addTask(taskId, taskDetails, form) {
-    if (form.checkValidity() == false) { return; }
+    if (form && form.checkValidity() == false) { return; }
     this.tasks[taskId] = taskDetails;
-    this.addTaskToDom(this.tasks[taskId], form);
-    //addTask.resetFields();
-    console.log("wdasdaw");
+    this.saveProjectsToLocalStorage();
+    this.addTaskToDom(this.tasks[taskId], false, taskId);
+    console.log("saved");
+    localStorage.setItem("projects", JSON.stringify(projects));
+    console.log("Task added:", taskDetails);
   }
 
-  addTaskToDom(taskObject, form) {
+  addTaskToDom(taskObject, form, taskKey) {
     if (form) {
       if (form.checkValidity() == false) {
         if (addTask.nameField.value == "") {
@@ -79,18 +52,14 @@ class Project {
         return;
       }
     }
-    console.log(taskObject)
-    const task_content = document.createElement("div");
 
+    const task_content = document.createElement("div");
     const left_side = document.createElement("div");
     const right_side = document.createElement("div");
-
     const check_mark = document.createElement("button");
     const task_name = document.createElement("div");
     const due_date = document.createElement("div");
-
     const option_container = document.createElement("div");
-
     const edit = document.createElement("button");
     const information = document.createElement("button");
     const del = document.createElement("button");
@@ -99,21 +68,18 @@ class Project {
     due_date.textContent = taskObject.dueDate;
 
     task_content.classList.add("task");
-
     left_side.classList.add("left-side");
     right_side.classList.add("right-side");
-
     check_mark.classList.add("checkMark", taskObject.difficulty);
     task_name.classList.add("name");
     due_date.classList.add("due-date");
-
     option_container.classList.add("option-container");
 
     edit.id = "task_option_1";
     information.id = "task_option_2";
     del.id = "task_option_3";
 
-    if (taskObject.complete == true) {
+    if (taskObject.complete) {
       check_mark.classList.add(`${taskObject.difficulty}-complete`);
       addImage(check_mark, WhiteCheck, "");
     }
@@ -125,214 +91,102 @@ class Project {
     document.getElementById("project_tasks_area").appendChild(task_content);
     task_content.appendChild(left_side);
     task_content.appendChild(right_side);
-
     left_side.appendChild(check_mark);
     left_side.appendChild(task_name);
     right_side.appendChild(due_date);
     right_side.appendChild(option_container);
-
     option_container.appendChild(edit);
     option_container.appendChild(information);
     option_container.appendChild(del);
 
     check_mark.addEventListener("mouseup", () => {
-      console.log("clicked");
-      if (taskObject.complete == true) {
-        taskObject.complete = false;
-        check_mark.replaceChildren();
-        if (check_mark.classList.contains(`${taskObject.difficulty}-complete`)) {
-          check_mark.classList.remove(`${taskObject.difficulty}-complete`);
-        }
-      } else {
-        taskObject.complete = true;
-
+      taskObject.complete = !taskObject.complete;
+      check_mark.replaceChildren();
+      if (taskObject.complete) {
         check_mark.classList.add(`${taskObject.difficulty}-complete`);
         addImage(check_mark, WhiteCheck, "");
+      } else {
+        check_mark.classList.remove(`${taskObject.difficulty}-complete`);
       }
-    })
-
+      this.saveProjectsToLocalStorage();
+    });
 
     del.addEventListener("mouseup", () => {
       task_content.remove();
-      this.removeTask(taskObject.name);
-    })
+      this.removeTask(taskKey);
+    });
 
     information.addEventListener("mouseup", () => {
       infoTask.modal.open = true;
-
       infoTask.nameField.value = taskObject.name;
       infoTask.descriptionField.value = taskObject.description;
-
       infoTask.dueDateField.value = taskObject.dueDate;
-      // //     // const dt = new Date(projects[ProjectManager.currentProject].tasks[name].dueDate);
-      // //     // const day = ("0" + dt.getDate()).slice(-2);
-      // //     // const month = ("0" + (dt.getMonth() + 1)).slice(-2);
-      // //     // const date = dt.getFullYear() + "-" + month + "-" + day;
-      // //     // infoTask.dueDateField.value = date
-
       infoTask.difficultyField.value = toTitleCase(taskObject.difficulty);
-    })
+    });
 
     edit.addEventListener("mouseup", () => {
+      const taskKeys = Object.keys(ProjectManager.currentProject.tasks)
+      const taskEntries = Object.entries(ProjectManager.currentProject.tasks);
+      for (let i = 0; i < taskKeys.length; i++) {
+        if (ProjectManager.currentProject.tasks[taskKeys[i]] == taskObject) {
+          ProjectManager.currentlyEditingTask.key = taskKeys[i];
+        }
+      }
+      ProjectManager.currentlyEditingTask.value = taskObject;
       editTask.modal.open = true;
-
       editTask.resetFields();
-      //console.log(`Current Project on Edit button: ${ProjectTemplates.currentProject.name}`);
-
       editTask.nameField.value = taskObject.name;
-      console.log(`Description: ${taskObject.description}`);
       editTask.descriptionField.value = taskObject.description;
-
       editTask.dueDateField.value = taskObject.dueDate;
       editTask.difficultyField.value = taskObject.difficulty;
+    });
 
-      console.log("Added all ");
-    })
-
-
-
-
-    editTask.saveButton.addEventListener("mouseup", () => {
-
-      if (editTask.form) {
-        console.log("occurreddsdad");
-        if (editTask.form.checkValidity() == false) {
-          if (editTask.nameField.value == "") {
-            editTask.nameField.classList.add("invalid");
-          }
-          if (editTask.descriptionField.value == "") {
-            editTask.descriptionField.classList.add("invalid");
-          }
-          if (editTask.dueDateField.value == "") {
-            editTask.dueDateField.classList.add("invalid");
-          }
-          if (editTask.difficultyField.selectedIndex == 0) {
-            editTask.difficultyField.classList.add("invalid");
-          }
-          return;
-        }
-      }
-
-      editTask.modal.open = false;
-
-      //console.log(project.tasks[taskObject]);
-
-      console.log(`Name Field: ${editTask.nameField.value}`);
-      console.log(`Description Field: ${editTask.descriptionField.value}`);
-      console.log(`Due Date Field: ${editTask.dueDateField.value}`);
-      console.log(`Difficulty Field: ${editTask.difficultyField.value}`);
-
-      for (let i = 0; i < Object.entries(this.tasks).length; i++) {
-        console.log("Entries");
-        console.log(Object.entries(this.tasks));
-        console.log(Object.entries(this.tasks)[i]);
-        console.log(Object.entries(this.tasks)[i]);
-        console.log(Object.entries(this.tasks)[i][0]);
-
-        if (this.tasks[Object.entries(this.tasks)[i][0]] == taskObject) {
-          console.log("same");
-          //console.log(console.log(Object.keys(this.tasks)[i][0][0]));
-          this.editTask(Object.entries(this.tasks)[i][0], { name: editTask.nameField.value, description: editTask.descriptionField.value, dueDate: editTask.dueDateField.value, difficulty: editTask.difficultyField.value, complete: false })
-        }
-      }
-
-      //this.editTask(Object.keys(this.tasks), { name: editTask.nameField.value, description: editTask.descriptionField.value, dueDate: editTask.dueDateField.value, difficulty: editTask.difficultyField.value })
-
-      // project.tasks[taskObj].name = editTask.nameField.value;
-      // project.tasks[taskObj].description = editTask.descriptionField.value;
-      // project.tasks[taskObj].dueDate = editTask.dueDateField.value;
-      // project.tasks[taskObj].difficulty = editTask.difficultyField.value;
-
-      // console.log(`Saved Task ${taskObj} in ${project.name}`);
-
-      // task_name.textContent = taskObj.name.toUpperCase();
-      // due_date.textContent = project.tasks[taskObj].dueDate;
-
-
-      // if (!check_mark.classList.contains(project.tasks[taskObj].difficulty)) {
-      //   if (check_mark.classList.contains("easy")) {
-      //     check_mark.classList.remove("easy");
-      //     check_mark.classList.remove("easy-complete");
-      //   } else if (check_mark.classList.contains("medium")) {
-      //     check_mark.classList.remove("medium");
-      //     check_mark.classList.remove("medium-complete");
-      //   } else if (check_mark.classList.contains("hard")) {
-      //     check_mark.classList.remove("hard");
-      //     check_mark.classList.remove("hard-complete");
-      //   }
-
-      //   check_mark.classList.add(project.tasks[taskObj].difficulty);
-      //   check_mark.classList.add(projects[ProjectManager.currentProject].tasks[name].difficulty);
-      //   if (project.tasks[taskObj].complete == true) {
-      //     check_mark.classList.add(`${project.tasks[taskObj].difficulty}-complete`);
-      //   }
-      // }
-
-
-
-    })
     addTask.resetFields();
     addTask.modal.open = false;
   }
 
-
-
-
   editTaskInDom(taskObj, updatedDetails) {
-    for (let i = 0; i < document.getElementById("project_tasks_area").children.length; i++) {
-      //console.log(document.getElementById("project_tasks_area").children[i][0]);
-      if (document.getElementById("project_tasks_area").children[i]) {
-        const projectTasksArea = document.getElementById("project_tasks_area");
-        const taskContainer = document.getElementById("project_tasks_area").children[i];
-        const leftSideElement = taskContainer.querySelector('.left-side');
-        const rightSideElement = taskContainer.querySelector('.right-side');
-        console.log("hi");
-        const checkmarkElement = leftSideElement.querySelector('.checkMark');
-        const nameElement = leftSideElement.querySelector('.name');
-        const dueDateElement = rightSideElement.querySelector(".due-date");
-        if (nameElement.textContent.toLowerCase() == taskObj.name.toLowerCase()) {
-          Object.assign(taskObj, updatedDetails);
-          nameElement.textContent = taskObj.name.toUpperCase();
-          dueDateElement.textContent = taskObj.dueDate;
-          console.log("yo");
+    const taskElements = document.getElementById("project_tasks_area").children;
+    for (let i = 0; i < taskElements.length; i++) {
+      const taskElement = taskElements[i];
+      const nameElement = taskElement.querySelector('.left-side .name');
+      if (nameElement.textContent.toLowerCase() === taskObj.name.toLowerCase()) {
+        const dueDateElement = taskElement.querySelector('.right-side .due-date');
+        const checkmarkElement = taskElement.querySelector('.left-side .checkMark');
+        Object.assign(taskObj, updatedDetails);
+        nameElement.textContent = taskObj.name.toUpperCase();
+        dueDateElement.textContent = taskObj.dueDate;
 
-          checkmarkElement.replaceChildren();
-          if (!checkmarkElement.classList.contains(taskObj.difficulty)) {
-            if (checkmarkElement.classList.contains("easy")) {
-              checkmarkElement.classList.remove("easy");
-              checkmarkElement.classList.remove("easy-complete");
-            } else if (checkmarkElement.classList.contains("medium")) {
-              checkmarkElement.classList.remove("medium");
-              checkmarkElement.classList.remove("medium-complete");
-            } else if (checkmarkElement.classList.contains("hard")) {
-              checkmarkElement.classList.remove("hard");
-              checkmarkElement.classList.remove("hard-complete");
-            }
-
-            checkmarkElement.classList.add(taskObj.difficulty);
-            checkmarkElement.classList.add(taskObj.difficulty);
-            if (taskObj.complete == true) {
-              checkmarkElement.classList.add(`${taskObj.difficulty}-complete`);
-            }
+        checkmarkElement.replaceChildren();
+        if (!checkmarkElement.classList.contains(taskObj.difficulty)) {
+          if (checkmarkElement.classList.contains("easy")) {
+            checkmarkElement.classList.remove("easy");
+            checkmarkElement.classList.remove("easy-complete");
+          } else if (checkmarkElement.classList.contains("medium")) {
+            checkmarkElement.classList.remove("medium");
+            checkmarkElement.classList.remove("medium-complete");
+          } else if (checkmarkElement.classList.contains("hard")) {
+            checkmarkElement.classList.remove("hard");
+            checkmarkElement.classList.remove("hard-complete");
           }
+
+          checkmarkElement.classList.add(taskObj.difficulty);
+
+        }
+        if (taskObj.complete == true) {
+          checkmarkElement.classList.add(`${taskObj.difficulty}-complete`);
+          addImage(checkmarkElement, WhiteCheck, "");
+          console.log("Add check mark");
         }
       }
-
-
-
-      //document.getElementById("project_tasks_area").children[i].getElementsByClassName("left-side")[0].getElementsByClassName("name")[0].textContent = taskObj.name;
-      //document.getElementById("project_tasks_area").children[i].getElementsByClassName("right-side")[0].getElementsByClassName("dueDate")[0].textContent = taskObj.dueDate;
     }
   }
 
   editTask(taskId, updatedDetails) {
     if (this.tasks[taskId]) {
       const task = this.tasks[taskId];
-      const oldName = task.name;
-      console.log("done");
-      //Object.assign(task, updatedDetails);
       this.editTaskInDom(task, updatedDetails);
-      //Object.assign(task, updatedDetails);
+      this.saveProjectsToLocalStorage();
       console.log(`Task ${taskId} updated:`, task);
     } else {
       console.error(`Task ${taskId} does not exist.`);
@@ -340,22 +194,27 @@ class Project {
   }
 
   findTasks() {
-    document.getElementById("project_tasks_area").replaceChildren();
-    console.log("loading");
-    for (let i = 0; i < Object.entries(this.tasks).length; i++) {
-      console.log("task");
-      this.addTaskToDom(this.tasks[Object.entries(this.tasks)[i][0]]);
+    const taskArea = document.getElementById("project_tasks_area");
+    taskArea.replaceChildren();
+    console.log("Loading tasks...");
+    for (const taskId in this.tasks) {
+      this.addTaskToDom(this.tasks[taskId], false, taskId);
     }
   }
 
   removeTask(taskId) {
     delete this.tasks[taskId];
+    this.saveProjectsToLocalStorage();
+    console.log(`Task ${taskId} removed.`);
+  }
+
+  saveProjectsToLocalStorage() {
+    localStorage.setItem("projects", JSON.stringify(projects));
   }
 }
 
 
-
-function globalAddTaskToDom(taskObject) {
+function globalAddTaskToDom(taskObject, form, taskKey) {
   console.log(taskObject)
   const task_content = document.createElement("div");
 
@@ -393,6 +252,7 @@ function globalAddTaskToDom(taskObject) {
   if (taskObject.complete == true) {
     check_mark.classList.add(`${taskObject.difficulty}-complete`);
     addImage(check_mark, WhiteCheck, "");
+    console.log("Added check mark");
   }
 
   addImage(edit, DarkBlueNotebookEditOutline, "");
@@ -431,7 +291,7 @@ function globalAddTaskToDom(taskObject) {
 
   del.addEventListener("mouseup", () => {
     task_content.remove();
-    ProjectManager.removeTask(taskObject.name);
+    ProjectManager.removeTask(taskKey);
   })
 
   information.addEventListener("mouseup", () => {
@@ -451,6 +311,15 @@ function globalAddTaskToDom(taskObject) {
   })
 
   edit.addEventListener("mouseup", () => {
+    const taskKeys = Object.keys(ProjectManager.currentProject.tasks)
+    const taskEntries = Object.entries(ProjectManager.currentProject.tasks[taskKeys[i]]);
+    console.log(taskKeys);
+    for (let i = 0; i < taskKeys.length; i++) {
+      if (ProjectManager.currentProject.tasks[taskKeys[i]] == taskObject) {
+        ProjectManager.currentlyEditingTask.key = taskKeys[i];
+      }
+    }
+    ProjectManager.currentlyEditingTask.value = taskObject;
     editTask.modal.open = true;
 
     editTask.resetFields();
@@ -491,6 +360,7 @@ function addImage(element, image, className) {
   element.appendChild(newImage);
 }
 
+
 const ProjectTemplates = {
 
   sideBarTemplate: function (name, description, project) {
@@ -505,7 +375,7 @@ const ProjectTemplates = {
         console.log(project.name);
         ProjectManager.currentProject = project;
         this.projectTaskContainer.add(name, description);
-        ProjectManager.currentProject.findTasks();
+        projects[name].findTasks();
         console.log("found tasks");
       }
     })
@@ -634,6 +504,10 @@ const infoTask = {
   }
 }
 
+const projects = {};
+
+
+
 const editTask = {
   closeButton: document.getElementById("edit_task_close_button"),
   saveButton: document.getElementById("edit_task_button_save"),
@@ -684,7 +558,6 @@ const addProject = {
   }
 }
 
-const projects = {};
 
 addProject.promptButton.addEventListener("mouseup", (e) => {
   addProject.modal.open = true;
@@ -722,6 +595,9 @@ addProject.addButton.addEventListener("mouseup", (e) => {
   ProjectTemplates.projectTaskContainer.findTasks(project);
   ProjectManager.currentProject = project;
   ProjectTemplates.projectTaskContainer.add(project.name, project.description);
+  console.log("saved")
+  console.log(projects);
+  localStorage.setItem("projects", JSON.stringify(projects));
   addProject.modal.open = false;
 
   addProject.resetFields();
@@ -739,10 +615,45 @@ addTask.addButton.addEventListener("mouseup", (e) => {
 
   ProjectManager.currentProject.addTask(addTask.nameField.value, { name: addTask.nameField.value, description: addTask.descriptionField.value, dueDate: addTask.dueDateField.value, difficulty: addTask.difficultyField.value, complete: false }, document.getElementById("add_task_modal").getElementsByClassName("modal-container")[0].getElementsByTagName("form")[0])
   //ProjectTemplates.projectTaskContainer.task(addTask.nameField.value, addTask.dueDateField.value, addTask.difficultyField.value, false, ProjectManager.currentProject, addTask.nameField.value);
-
+  console.log("saved");
+  localStorage.setItem("projects", JSON.stringify(projects));
   console.log(addTask.form);
+  console.log(projects);
   //addTask.resetFields();
 })
+
+editTask.saveButton.addEventListener("mouseup", () => {
+  if (editTask.form && editTask.form.checkValidity() == false) {
+    if (editTask.nameField.value == "") {
+      editTask.nameField.classList.add("invalid");
+    }
+    if (editTask.descriptionField.value == "") {
+      editTask.descriptionField.classList.add("invalid");
+    }
+    if (editTask.dueDateField.value == "") {
+      editTask.dueDateField.classList.add("invalid");
+    }
+    if (editTask.difficultyField.selectedIndex == 0) {
+      editTask.difficultyField.classList.add("invalid");
+    }
+    return;
+  }
+
+  editTask.modal.open = false;
+  const updatedTask = {
+    name: editTask.nameField.value,
+    description: editTask.descriptionField.value,
+    dueDate: editTask.dueDateField.value,
+    difficulty: editTask.difficultyField.value,
+    complete: ProjectManager.currentlyEditingTask.value.complete
+  };
+
+  const taskEntries = Object.entries(ProjectManager.currentProject.tasks)
+  console.log(ProjectManager.currentlyEditingTask.key);
+  ProjectManager.currentProject.editTask(ProjectManager.currentlyEditingTask.key, updatedTask);
+  ProjectManager.currentlyEditingTask.key = undefined;
+  ProjectManager.currentlyEditingTask.value = undefined;
+});
 
 infoTask.closeButton.addEventListener("mouseup", (e) => {
   infoTask.modal.open = false;
@@ -760,7 +671,6 @@ document.getElementById("inbox").addEventListener("mouseup", () => {
   const projectKeys = Object.keys(projects);
 
 
-
   document.getElementById("project_tasks_area").replaceChildren();
   ProjectTemplates.projectTaskContainer.clear();
   ProjectTemplates.projectTaskContainer.header("Inbox", "");
@@ -774,6 +684,8 @@ document.getElementById("inbox").addEventListener("mouseup", () => {
     //console.log(taskEntries[0][1]["dueDate"]);
   }
 
+  console.log("All tasks:");
+  console.log(AllTasks);
 
   AllTasks.sort(function (a, b) {
     // Turn your strings into dates, and then subtract them
@@ -781,6 +693,7 @@ document.getElementById("inbox").addEventListener("mouseup", () => {
     return new Date(b[1]["dueDate"]).getTime() - new Date(a[1]["dueDate"]).getTime();
   });
   //AllTasks.filter((task) = task[0][1]["dueDate"])
+  console.log("All tasks after date filter");
   console.log(AllTasks);
 
 
@@ -788,12 +701,14 @@ document.getElementById("inbox").addEventListener("mouseup", () => {
     console.log(Object.entries(AllTasks)[i]);
     //console.log(Object.entries(AllTasks)[i][1][0]);
     console.log("ran");
+    console.log("Project Keys:");
+    console.log(projectKeys);
     for (let j = 0; j < projectKeys.length; j++) {
-      const taskEntries = Object.entries(projects[projectKeys[i]].tasks);
+      const taskEntries = Object.entries(projects[projectKeys[j]].tasks);
       console.log("ran again");
       if (projects[projectKeys[j]].tasks[Object.entries(AllTasks)[i][1][0]]) {
         console.log("equals");
-        globalAddTaskToDom(projects[projectKeys[j]].tasks[Object.entries(AllTasks)[i][1][0]]);
+        globalAddTaskToDom(projects[projectKeys[j]].tasks[Object.entries(AllTasks)[i][1][0]],);
       }
       //AllTasks.push(taskEntries);
       //console.log(taskEntries[0][1]["dueDate"]);
@@ -828,7 +743,8 @@ document.getElementById("this_week").addEventListener("mouseup", () => {
   //   return new Date(b[1]["dueDate"]).getTime() - new Date(a[1]["dueDate"]).getTime();
   // });
   //console.log(AllTasks[0][1]["dueDate"])
-  const filteredTasks = AllTasks.filter((task) => new Date(task[1]["dueDate"]).getWeek() === new Date().getWeek())
+  const weekFiltered = AllTasks.filter((task) => new Date(task[1]["dueDate"]).getWeek() && new Date().getFullYear())
+  const filteredTasks = weekFiltered.filter((task) => new Date(task[1]["dueDate"]).getFullYear() == new Date().getFullYear())
   console.log(filteredTasks);
 
 
@@ -910,3 +826,33 @@ function submitForm(event) {
 add_task_form.addEventListener('submit', submitForm);
 edit_task_form.addEventListener('submit', submitForm);
 
+if (localStorage.getItem("projects")) {
+  //const projects = JSON.parse(localStorage.projects);
+  //console.log(`Projects: ${projects}`);
+  console.log("Project Objects:");
+  const savedProjs = Object.entries(JSON.parse(localStorage.projects));
+  console.log(savedProjs);
+  for (let i = 0; i < savedProjs.length; i++) {
+    console.log(`No of Projects: ${savedProjs.length}`);
+    let project = new Project(savedProjs[i][1].name, savedProjs[i][1].description);
+    console.log("ran local");
+    //let projectName = project.name;
+
+    projects[project.name] = project;
+
+    ProjectTemplates.sideBarTemplate(project.name, project.description, project);
+    ProjectTemplates.projectTaskContainer.findTasks(project);
+    ProjectManager.currentProject = project;
+    ProjectTemplates.projectTaskContainer.add(project.name, project.description);
+    //localStorage.setItem("projects", JSON.stringify(projects));
+    console.log(JSON.parse(localStorage.projects));
+    console.log(Object.entries(savedProjs[i][1].tasks));
+    for (let j = 0; j < Object.entries(savedProjs[i][1].tasks).length; j++) {
+      const task = Object.entries(savedProjs[i][1].tasks)[j];
+      project.addTask(task[0], { name: task[1].name, description: task[1].description, dueDate: task[1].dueDate, difficulty: task[1].difficulty, complete: task[1].complete });
+    }
+  }
+
+} else {
+
+}
